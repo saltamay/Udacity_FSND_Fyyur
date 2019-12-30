@@ -12,6 +12,8 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from flask_migrate import Migrate
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -22,6 +24,8 @@ app.config.from_object('config')
 db = SQLAlchemy(app)
 
 # TODO: connect to a local postgresql database
+
+migrate = Migrate(app, db)
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -38,6 +42,7 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    num_upcoming_shows = db.Column(db.Integer, nullable=False, default=0)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -87,28 +92,18 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
+  venues_in_san_francisco=Venue.query.filter_by(city='San Francisco', state='CA').all()
+  venues_in_new_york=Venue.query.filter_by(city='New York', state='NY').all()
   data=[{
     "city": "San Francisco",
     "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
+    "venues": venues_in_san_francisco
   }, {
     "city": "New York",
     "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
+    "venues": venues_in_new_york
   }]
-  return render_template('pages/venues.html', areas=data);
+  return render_template('pages/venues.html', areas=data)
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
