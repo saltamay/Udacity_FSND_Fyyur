@@ -440,7 +440,7 @@ def edit_artist_submission(artist_id):
     render_template('errors/500.html')
   else:
     # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + 'info was successfully updated!')
+    flash('Artist ' + request.form['name'] + ' info was successfully updated!')
     return render_template('pages/home.html')
   return redirect(url_for('show_artist', artist_id=artist_id))
 

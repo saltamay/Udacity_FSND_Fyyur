@@ -75,10 +75,11 @@
 	</div>
 </section>
 <h3>
-	<a href="/"><button data-id={{ venue.id }} class="btn btn-danger btn-lg delete">Delete</button></a>
+	<a href="/artists/{{ artist.id }}/edit"><button class="btn btn-warning btn-lg btn-update">Update</button></a>
+	<a href="/artists/{{ artist.id }}/edit"><button class="btn btn-danger btn-lg btn-delete">Delete</button></a>
 </h3>
 <script>
-	document.querySelector('.delete').addEventListener('click', e => {
+	document.querySelector('.btn-delete').addEventListener('click', e => {
 	const id = e.target.dataset.id;
 	fetch(`/venues/${id}`, {
 		method: 'DELETE',
