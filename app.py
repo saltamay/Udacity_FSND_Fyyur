@@ -131,19 +131,23 @@ def search_venues():
   # search for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
   search_term=request.form.get('search_term', '')
-  data=Venue.query.filter(Venue.name.ilike('%' + search_term + '%')).all()
+  if search_term.find(',') != -1:
+    city=search_term.split(', ')[0]
+    state=search_term.split(', ')[1].upper()
+    if city.find(' '):
+      city_word_list = []
+      for word in city.split(' '):
+        city_word_list.append(word.capitalize())
+      city=' '.join(city_word_list)
+    search_term=city + ', ' + state
+    data=Venue.query.filter_by(city=city, state=state).all()
+  else:
+    data=Venue.query.filter(Venue.name.ilike('%' + search_term + '%')).all()
+  
   response={
     "count": len(data),
     "data": data
   }
-  # response={
-  #   "count": 1,
-  #   "data": [{
-  #     "id": 2,
-  #     "name": "The Dueling Pianos Bar",
-  #     "num_upcoming_shows": 0,
-  #   }]
-  # }
   return render_template('pages/search_venues.html', results=response, search_term=search_term)
 
 @app.route('/venues/<int:venue_id>')
@@ -316,19 +320,23 @@ def search_artists():
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band".
   search_term=request.form.get('search_term', '')
-  data=Artist.query.filter(Artist.name.ilike('%' + search_term + '%')).all()
+  if search_term.find(',') != -1:
+    city=search_term.split(', ')[0]
+    state=search_term.split(', ')[1].upper()
+    if city.find(' '):
+      city_word_list = []
+      for word in city.split(' '):
+        city_word_list.append(word.capitalize())
+      city=' '.join(city_word_list)
+    search_term=city + ', ' + state
+    data=Artist.query.filter_by(city=city, state=state).all()
+  else:
+    data=Artist.query.filter(Artist.name.ilike('%' + search_term + '%')).all()
+  
   response={
     "count": len(data),
     "data": data
   }
-  # response={
-  #   "count": 1,
-  #   "data": [{
-  #     "id": 4,
-  #     "name": "Guns N Petals",
-  #     "num_upcoming_shows": 0,
-  #   }]
-  # }
   return render_template('pages/search_artists.html', results=response, search_term=search_term)
 
 @app.route('/artists/<int:artist_id>')
