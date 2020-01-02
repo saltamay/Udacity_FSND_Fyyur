@@ -155,7 +155,7 @@ def show_venue(venue_id):
     artist=Artist.query.get(show.artist_id)
     show.artist_name=artist.name
     show.artist_image_link=artist.image_link
-    show_time = datetime.strptime(show.start_time,"%Y-%m-%dT%H:%M:%S.%fZ")
+    show_time = datetime.strptime(show.start_time,"%Y-%m-%d %H:%M:%S")
     if today >= show_time:
       venue.past_shows.append(show)
     else:
@@ -340,7 +340,7 @@ def show_artist(artist_id):
     venue=Venue.query.get(show.venue_id)
     show.venue_name=venue.name
     show.venue_image_link=venue.image_link
-    show_time = datetime.strptime(show.start_time,"%Y-%m-%dT%H:%M:%S.%fZ")
+    show_time = datetime.strptime(show.start_time,"%Y-%m-%d %H:%M:%S")
     if today >= show_time:
       artist.past_shows.append(show)
     else:
@@ -464,13 +464,31 @@ def create_shows():
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
-
-  # on successful db insert, flash success
-  flash('Show was successfully listed!')
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Show could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  return render_template('pages/home.html')
+  error=False
+  artist_id=request.form['artist_id']
+  venue_id=request.form['venue_id']
+  start_time=request.form['start_time']
+  try:
+    new_show=Show(artist_id=artist_id, venue_id=venue_id, start_time=start_time)
+    db.session.add(new_show)
+    db.session.commit()
+  except:
+    error=True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    # TODO: on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Show could not be listed.')
+    render_template('errors/500.html')
+  else:
+    # on successful db insert, flash success
+    flash('Show was successfully listed!')
+    return render_template('pages/home.html')
 
 @app.errorhandler(404)
 def not_found_error(error):
