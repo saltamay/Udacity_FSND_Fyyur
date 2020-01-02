@@ -105,18 +105,40 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
-  venues_in_san_francisco=Venue.query.filter_by(city='San Francisco', state='CA').all()
-  venues_in_new_york=Venue.query.filter_by(city='New York', state='NY').all()
-  data=[{
+  # venues_in_san_francisco=Venue.query.filter_by(city='San Francisco', state='CA').all()
+  # venues_in_new_york=Venue.query.filter_by(city='New York', state='NY').all()
+  # data=[{
+  #   "city": "San Francisco",
+  #   "state": "CA",
+  #   "venues": venues_in_san_francisco
+  # }, {
+  #   "city": "New York",
+  #   "state": "NY",
+  #   "venues": venues_in_new_york
+  # }]
+  areas=[{
     "city": "San Francisco",
     "state": "CA",
-    "venues": venues_in_san_francisco
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": venues_in_new_york
+    "venues": []
   }]
-  return render_template('pages/venues.html', areas=data)
+  venues=Venue.query.all()
+  for venue in venues:
+    inserted=False
+    for area in areas:
+      if area["city"] == venue.city and area["state"] == venue.state:
+        area["venues"].append(venue)
+        inserted=True
+    if not inserted:
+      area = {
+        "city": None,
+        "state": None,
+        "venues": []
+      }
+      area["city"]=venue.city
+      area["state"]=venue.state
+      area["venues"].append(venue)
+      areas.append(area)
+  return render_template('pages/venues.html', areas=areas)
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
