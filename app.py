@@ -48,6 +48,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String)
     image_link = db.Column(db.String(500))
+    timestamp = db.Column(db.DateTime, default=datetime.now().replace(microsecond=0))
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -63,6 +64,7 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String)
     image_link = db.Column(db.String(500))
+    timestamp = db.Column(db.DateTime, default=datetime.now().replace(microsecond=0))
     shows = db.relationship('Show', backref='artist', lazy=True)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -95,7 +97,32 @@ app.jinja_env.filters['datetime'] = format_datetime
 
 @app.route('/')
 def index():
-  return render_template('pages/home.html')
+  latest_venues=Venue.query.filter(Venue.timestamp.isnot(None)).order_by(Venue.timestamp).limit(10)
+  latest_artists=Artist.query.filter(Artist.timestamp.isnot(None)).order_by(Artist.timestamp).limit(10)
+
+  if len(latest_venues.all()) == 0:
+    latest_venues_data={
+      "display": False,
+      "list": latest_venues
+    }
+  else:
+    latest_venues_data={
+      "display": True,
+      "list": latest_venues
+    }
+  
+  if len(latest_artists.all()) == 0:
+    latest_artists_data={
+      "display": False,
+      "list": latest_artists
+    }
+  else:
+    latest_artists_data={
+      "display": True,
+      "list": latest_artists
+    }
+  
+  return render_template('pages/home.html', venues=latest_venues_data, artists=latest_artists_data)
 
 
 #  Venues
@@ -167,6 +194,7 @@ def show_venue(venue_id):
     show.artist_name=artist.name
     show.artist_image_link=artist.image_link
     show_time = datetime.strptime(show.start_time,"%Y-%m-%d %H:%M:%S")
+    print(datetime.timestamp(show_time))
     if today >= show_time:
       venue.past_shows.append(show)
     else:

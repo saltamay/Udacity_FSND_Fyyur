@@ -22,4 +22,72 @@
 		<img id="front-splash" src="{{ url_for('static',filename='img/front-splash.jpg') }}" alt="Front Photo of Musical Band" />
 	</div>
 </div>
+{% if venues.display %}
+<section>
+	<h2 class="monospace">New Venues</h2>
+	<div class="row">
+		{%for venue in venues.list %}
+		<div class="col-sm-4">
+			<div class="tile tile-venue" data-timestamp={{ venue.timestamp }}>
+				<img src="{{ venue.image_link }}" alt="Show Venue Image" />
+				<h5><a href="/venues/{{ venue.id }}">{{ venue.name }}</a></h5>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</section>
+{% endif %}
+{% if artists.display %}
+<section>
+	<h2 class="monospace">New Artists</h2>
+	<div class="row">
+		{%for artist in artists.list %}
+		<div class="col-sm-4">
+			<div class="tile tile-artist">
+				<img src="{{ artist.image_link }}" alt="Show Artist Image" />
+				<h5><a href="/artists/{{ artist.id }}">{{ artist.name }}</a></h5>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</section>
+{% endif %}
+<script>
+	// Get current date
+	const now = Date.now();
+
+	document.querySelectorAll('.tile-venue').forEach(venue => {
+		const venueInsertDate = Date.parse(venue.dataset.timestamp);
+		// Calculate the difference between now and the insert date
+		let days = (now - venueInsertDate) / (1000 * 60 * 60 * 24)
+		days = Math.ceil(days);
+		let message = '';
+		if (days === 1) {
+			message = `${days} day ago`;
+		} else {
+			message = `${days} days ago`;
+		}
+		const badge = document.createElement('span');
+		badge.classList = 'badge badge-secondary';
+		badge.innerHTML = message;
+		venue.appendChild(badge);
+	});
+
+	document.querySelectorAll('.tile-artist').forEach(artist => {
+		const artistInsertDate = Date.parse(artist.dataset.timestamp);
+		// Calculate the difference between now and the insert date
+		let days = (now - artistInsertDate) / (1000 * 60 * 60 * 24)
+		days = Math.ceil(days);
+		let message = '';
+		if (days === 1) {
+			message = `${days} day ago`;
+		} else {
+			message = `${days} days ago`;
+		}
+		const badge = document.createElement('span');
+		badge.classList = 'badge badge-secondary';
+		badge.innerHTML = message;
+		venue.appendChild(badge);
+	});
+</script>
 {% endblock %}
