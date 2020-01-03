@@ -97,9 +97,12 @@ app.jinja_env.filters['datetime'] = format_datetime
 
 @app.route('/')
 def index():
+  # Order venues and artists by time they are created and return only the top 10 result
   latest_venues=Venue.query.filter(Venue.timestamp.isnot(None)).order_by(Venue.timestamp).limit(10)
   latest_artists=Artist.query.filter(Artist.timestamp.isnot(None)).order_by(Artist.timestamp).limit(10)
 
+  # Chcek if the results are empty. If so set the display property to false
+  # This will prevent frontend to render empty Artists or Venues section
   if len(latest_venues.all()) == 0:
     latest_venues_data={
       "display": False,
@@ -121,7 +124,6 @@ def index():
       "display": True,
       "list": latest_artists
     }
-  
   return render_template('pages/home.html', venues=latest_venues_data, artists=latest_artists_data)
 
 
@@ -131,7 +133,7 @@ def index():
 @app.route('/venues')
 def venues():
   # TODO: replace with real venues data.
-  #       num_shows should be aggregated based on number of upcoming shows per venue.
+  # Dynamically create the areas list
   areas=[]
   venues=Venue.query.all()
   for venue in venues:
@@ -158,6 +160,8 @@ def search_venues():
   # search for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
   search_term=request.form.get('search_term', '')
+  
+  # Add an option to search venues through "City, State"
   if search_term.find(',') != -1:
     city=search_term.split(', ')[0]
     state=search_term.split(', ')[1].upper()
@@ -194,7 +198,6 @@ def show_venue(venue_id):
     show.artist_name=artist.name
     show.artist_image_link=artist.image_link
     show_time = datetime.strptime(show.start_time,"%Y-%m-%d %H:%M:%S")
-    print(datetime.timestamp(show_time))
     if today >= show_time:
       venue.past_shows.append(show)
     else:
@@ -276,7 +279,6 @@ def delete_venue(venue_id):
 def edit_venue(venue_id):
   form = VenueForm()
   # TODO: populate form with values from venue with ID <venue_id>
-  venue=Venue.query.get(venue_id)
   form.name.data=venue.name
   form.city.data=venue.city
   form.state.data=venue.state
@@ -284,20 +286,9 @@ def edit_venue(venue_id):
   form.phone.data=venue.phone
   form.genres.data=venue.genres
   form.facebook_link.data=venue.facebook_link
-  # venue={
-  #   "id": 1,
-  #   "name": "The Musical Hop",
-  #   "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-  #   "address": "1015 Folsom Street",
-  #   "city": "San Francisco",
-  #   "state": "CA",
-  #   "phone": "123-123-1234",
-  #   "website": "https://www.themusicalhop.com",
-  #   "facebook_link": "https://www.facebook.com/TheMusicalHop",
-  #   "seeking_talent": True,
-  #   "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-  #   "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
-  # }
+
+  venue=Venue.query.get(venue_id)
+
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
@@ -330,16 +321,6 @@ def edit_venue_submission(venue_id):
 def artists():
   # TODO: replace with real data returned from querying the database
   artists=Artist.query.all()
-  # data=[{
-  #   "id": 4,
-  #   "name": "Guns N Petals",
-  # }, {
-  #   "id": 5,
-  #   "name": "Matt Quevedo",
-  # }, {
-  #   "id": 6,
-  #   "name": "The Wild Sax Band",
-  # }]
   return render_template('pages/artists.html', artists=artists)
 
 @app.route('/artists/search', methods=['POST'])
@@ -347,7 +328,8 @@ def search_artists():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band".
-  search_term=request.form.get('search_term', '')
+  search_term=request.form.get('search_term', '')\
+  # Add an option to search through "City, State"
   if search_term.find(',') != -1:
     city=search_term.split(', ')[0]
     state=search_term.split(', ')[1].upper()
@@ -398,14 +380,16 @@ def show_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
   form = ArtistForm()
-  artist=Artist.query.get(artist_id)
+  # TODO: populate form with fields from artist with ID <artist_id>
   form.name.data=artist.name
   form.city.data=artist.city
   form.state.data=artist.state
   form.phone.data=artist.phone
   form.genres.data=artist.genres
   form.facebook_link.data=artist.facebook_link
-  # TODO: populate form with fields from artist with ID <artist_id>
+
+  artist=Artist.query.get(artist_id)
+  
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
