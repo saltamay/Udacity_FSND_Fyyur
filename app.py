@@ -15,6 +15,7 @@ from forms import *
 from flask_migrate import Migrate
 import sys
 from datetime import datetime, date
+from models import db, Venue, Artist, Show
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -23,59 +24,12 @@ from datetime import datetime, date
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
-db = SQLAlchemy(app)
+db.init_app(app)
+# db = SQLAlchemy(app)
 
 # TODO: connect to a local postgresql database
 
 migrate = Migrate(app, db)
-
-#----------------------------------------------------------------------------#
-# Models.
-#----------------------------------------------------------------------------#
-
-class Venue(db.Model):
-    __tablename__ = 'Venue'
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    genres = db.Column(db.ARRAY(db.String))
-    address = db.Column(db.String(120))
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    website = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String)
-    image_link = db.Column(db.String(500))
-    timestamp = db.Column(db.DateTime, default=datetime.now().replace(microsecond=0))
-
-class Artist(db.Model):
-    __tablename__ = 'Artist'
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    genres = db.Column(db.ARRAY(db.String))
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    website = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String)
-    image_link = db.Column(db.String(500))
-    timestamp = db.Column(db.DateTime, default=datetime.now().replace(microsecond=0))
-    shows = db.relationship('Show', backref='artist', lazy=True)
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
-class Show(db.Model):
-  __tablename__ = 'Show'
-
-  id = db.Column(db.Integer, primary_key=True)
-  artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-  venue_id = db.Column(db.Integer)
-  start_time = db.Column(db.String(120))
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -250,7 +204,7 @@ def create_venue_submission():
   else:
     # on successful db insert, flash success
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    return render_template('pages/home.html')
+    return redirect(url_for('index'))
 
 #  Delete Venue
 #  ----------------------------------------------------------------
@@ -457,7 +411,7 @@ def create_artist_submission():
   else:
     # on successful db insert, flash success
     flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    return render_template('pages/home.html')
+    return redirect(url_for('index'))
 
 #  Shows
 #  ----------------------------------------------------------------

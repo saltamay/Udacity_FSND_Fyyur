@@ -43,7 +43,7 @@
 	<div class="row">
 		{%for artist in artists.list %}
 		<div class="col-sm-4">
-			<div class="tile tile-artist">
+			<div class="tile tile-artist" data-timestamp={{ artist.timestamp }}>
 				<img src="{{ artist.image_link }}" alt="Show Artist Image" />
 				<h5><a href="/artists/{{ artist.id }}">{{ artist.name }}</a></h5>
 			</div>
@@ -87,7 +87,7 @@
 		const badge = document.createElement('span');
 		badge.classList = 'badge badge-secondary';
 		badge.innerHTML = message;
-		venue.appendChild(badge);
+		artist.appendChild(badge);
 	});
 </script>
 {% endblock %}
